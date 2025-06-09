@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Html } from '@react-three/drei'
 
+// GA用の型定義
+declare global {
+  function gtag(...args: any[]): void
+}
+
 interface LinkItem {
   title: string
   url?: string
@@ -137,6 +142,14 @@ function LinkCard({ link, language }: { link: LinkItem; language: 'ja' | 'en' })
 
   const handleClick = () => {
     if (link.url) {
+      // GAイベント送信
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'click', {
+          event_category: 'outbound_link',
+          event_label: link.title,
+          value: 1
+        })
+      }
       window.open(link.url, '_blank')
     }
   }
