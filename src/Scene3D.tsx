@@ -4,6 +4,7 @@ import { Vector3, Color } from 'three'
 import WireframeSphere from './WireframeSphere'
 import LightStreaks from './LightStreaks'
 import StarField from './StarField'
+import LinkSection from './LinkSection'
 
 function Scene3D() {
   const { camera, scene } = useThree()
@@ -15,6 +16,12 @@ function Scene3D() {
   // 球の回転状態を管理
   const [sphereRotation, setSphereRotation] = useState({ x: 0, y: 0, z: 0 })
   
+  // リンクセクションの表示制御
+  const [showLinks, setShowLinks] = useState(true)
+  
+  // 背景色の状態管理（LinkSectionに渡すため）
+  const [currentBgColor, setCurrentBgColor] = useState('#000011')
+  
   // 球の回転更新コールバック
   const handleSphereRotationUpdate = (rotation: { x: number; y: number; z: number }) => {
     setSphereRotation(rotation)
@@ -24,6 +31,18 @@ function Scene3D() {
   useEffect(() => {
     scene.background = new Color(0x000011)
   }, [scene])
+  
+  // キーボードイベントでリンクセクション切り替え
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'l' || event.key === 'L') {
+        setShowLinks(prev => !prev)
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [])
   
   useFrame((_, delta) => {
     time.current += delta
@@ -44,6 +63,9 @@ function Scene3D() {
     const bgHue = (bgColorTime.current * 0.05) % 1
     const backgroundColor = new Color().setHSL(bgHue, 0.8, 0.05)
     scene.background = backgroundColor
+    
+    // 背景色をHEX形式でStateに保存
+    setCurrentBgColor(`#${backgroundColor.getHexString()}`)
   })
   
   return (
@@ -60,6 +82,9 @@ function Scene3D() {
       
       {/* 光の筋 */}
       <LightStreaks sphereRotation={sphereRotation} />
+      
+      {/* リンクセクション */}
+      {showLinks && <LinkSection currentBgColor={currentBgColor} />}
     </>
   )
 }
