@@ -11,11 +11,13 @@ interface LinkItem {
 
 interface Translations {
   header: { ja: string; en: string }
+  tagline: { ja: string; en: string }
   toggle: { ja: string; en: string }
 }
 
 const translations: Translations = {
   header: { ja: 'tropical-362827', en: 'tropical-362827' },
+  tagline: { ja: '3Dエロゲで遊んだり、コードを書いたりします。', en: 'Playing 3D (ero)games and Writing codes.' },
   toggle: { ja: 'EN', en: 'JA' }
 }
 
@@ -70,11 +72,11 @@ const linkData: LinkItem[] = [
     type: 'text'
   },
   {
-    title: 'tropical-362827',
+    title: '@tropical_362827',
     url: 'https://twitter.com/tropical_362827',
     description: {
-      ja: 'フォローお待ちしております！',
-      en: 'Follow me on Twitter/X!'
+      ja: 'Xのアカウント',
+      en: 'Follow me on X!'
     },
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
     type: 'social'
@@ -204,14 +206,17 @@ export default function LinkSection({ }: LinkSectionProps) {
     color: '#ffffff',
     fontSize: 'clamp(18px, 4vw, 20px)',
     fontWeight: 'bold',
-    marginBottom: 'clamp(16px, 4vw, 20px)',
+    marginBottom: 'clamp(8px, 2vw, 12px)',
     textAlign: 'center',
     fontFamily: 'Arial, sans-serif',
-    borderBottom: '1px solid rgba(255,255,255,0.2)',
-    paddingBottom: 'clamp(8px, 2vw, 12px)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
+  }
+
+  const dividerStyle: React.CSSProperties = {
+    borderBottom: '1px solid rgba(255,255,255,0.2)',
+    paddingBottom: 'clamp(8px, 2vw, 12px)',
   }
 
   const toggleButtonStyle: React.CSSProperties = {
@@ -239,6 +244,17 @@ export default function LinkSection({ }: LinkSectionProps) {
           >
             {translations.toggle[language]}
           </button>
+        </div>
+        <div style={dividerStyle}>
+          <div style={{
+            color: '#cccccc',
+            fontSize: 'clamp(12px, 3vw, 14px)',
+            textAlign: 'left',
+            fontFamily: 'Arial, sans-serif',
+            fontStyle: 'italic'
+          }}>
+            {translations.tagline[language]}
+          </div>
         </div>
         {linkData.map((link, index) => (
           <LinkCard key={index} link={link} language={language} />
