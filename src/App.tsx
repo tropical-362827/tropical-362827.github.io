@@ -11,6 +11,11 @@ function App() {
           near: 0.1,
           far: 1000
         }}
+        gl={{
+          antialias: false,  // Windows向けアンチエイリアス無効
+          powerPreference: 'high-performance',  // 高性能GPU使用
+          alpha: false  // 透明度無効で高速化
+        }}
       >
         <Scene3D />
       </Canvas>

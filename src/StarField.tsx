@@ -11,7 +11,7 @@ export default function StarField({ sphereRotation }: StarFieldProps) {
   
   // 星の数と配置を生成
   const positions = useMemo(() => {
-    const starCount = 3000
+    const starCount = 1500
     const positions = new Float32Array(starCount * 3)
     
     for (let i = 0; i < starCount; i++) {
