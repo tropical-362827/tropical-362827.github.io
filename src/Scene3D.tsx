@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
+import { Stats } from '@react-three/drei'
 import { Vector3, Color } from 'three'
 import WireframeSphere from './WireframeSphere'
 import LightStreaks from './LightStreaks'
@@ -20,6 +21,9 @@ function Scene3D() {
   // リンクセクションの表示制御
   const [showLinks, setShowLinks] = useState(true)
   
+  // Stats表示制御
+  const [showStats, setShowStats] = useState(false)
+  
   // 背景色の状態管理（LinkSectionに渡すため）
   const [currentBgColor, setCurrentBgColor] = useState('#000011')
   
@@ -33,11 +37,14 @@ function Scene3D() {
     scene.background = new Color(0x000011)
   }, [scene])
   
-  // キーボードイベントでリンクセクション切り替え
+  // キーボードイベントでリンクセクション・Stats切り替え
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === 'l' || event.key === 'L') {
         setShowLinks(prev => !prev)
+      }
+      if (event.key === 's' || event.key === 'S') {
+        setShowStats(prev => !prev)
       }
     }
     
@@ -90,6 +97,9 @@ function Scene3D() {
       
       {/* リンクセクション */}
       {showLinks && <LinkSection currentBgColor={currentBgColor} />}
+      
+      {/* FPS表示 */}
+      {showStats && <Stats />}
     </>
   )
 }
