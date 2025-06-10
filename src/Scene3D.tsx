@@ -21,11 +21,14 @@ function Scene3D() {
   // リンクセクションの表示制御
   const [showLinks, setShowLinks] = useState(true)
   
-  // Stats表示制御
-  const [showStats, setShowStats] = useState(false)
+  // Stats表示制御（0:非表示, 1:FPS, 2:MS, 3:MB）
+  const [statsMode, setStatsMode] = useState(0)
   
   // 背景色の状態管理（LinkSectionに渡すため）
   const [currentBgColor, setCurrentBgColor] = useState('#000011')
+  
+  // 事前確保したColorオブジェクト（使い回し用）
+  const reusableColor = useRef(new Color())
   
   // 球の回転更新コールバック
   const handleSphereRotationUpdate = (rotation: { x: number; y: number; z: number }) => {
@@ -44,7 +47,7 @@ function Scene3D() {
         setShowLinks(prev => !prev)
       }
       if (event.key === 's' || event.key === 'S') {
-        setShowStats(prev => !prev)
+        setStatsMode(prev => (prev + 1) % 4)  // 0→1→2→3→0のサイクル
       }
     }
     
@@ -67,15 +70,15 @@ function Scene3D() {
     camera.position.set(0, 0, 0)
     camera.lookAt(cameraTarget.current)
     
-    // 背景色の変化
+    // 背景色の変化（事前確保したColorオブジェクトを再利用）
     const bgHue = (bgColorTime.current * 0.05) % 1
-    const backgroundColor = new Color().setHSL(bgHue, 0.8, 0.05)
-    scene.background = backgroundColor
+    reusableColor.current.setHSL(bgHue, 0.8, 0.05)
+    scene.background = reusableColor.current
     
     // 背景色をHEX形式でStateに保存（変化があった場合のみ）
     const hueRounded = Math.round(bgHue * 1000) // 色相を1000分割で丸める
     if (hueRounded !== lastBgHue.current) {
-      setCurrentBgColor(`#${backgroundColor.getHexString()}`)
+      setCurrentBgColor(`#${reusableColor.current.getHexString()}`)
       lastBgHue.current = hueRounded
     }
   })
@@ -98,8 +101,10 @@ function Scene3D() {
       {/* リンクセクション */}
       {showLinks && <LinkSection currentBgColor={currentBgColor} />}
       
-      {/* FPS表示 */}
-      {showStats && <Stats />}
+      {/* Stats表示（FPS/MS/MB切り替え） */}
+      {statsMode === 1 && <Stats showPanel={0} />}  {/* FPS */}
+      {statsMode === 2 && <Stats showPanel={1} />}  {/* MS */}
+      {statsMode === 3 && <Stats showPanel={2} />}  {/* MB */}
     </>
   )
 }

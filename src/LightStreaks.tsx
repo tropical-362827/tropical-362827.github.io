@@ -21,14 +21,48 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
   const time = useRef(0)
   const lastStreakTime = useRef(0)
   
-  const createRandomStreak = () => {
+  // オブジェクトプール（事前確保）
+  const reusableVector3Pool = useRef<Vector3[]>([])
+  const reusableColorPool = useRef<Color[]>([])
+  const maxPoolSize = 35  // 最大プールサイズを増加
+  
+  // プール初期化
+  useEffect(() => {
+    // Vector3プール初期化
+    for (let i = 0; i < maxPoolSize * 4; i++) {  // 1つの光につき4個のVector3が必要
+      reusableVector3Pool.current.push(new Vector3())
+    }
+    // Colorプール初期化
+    for (let i = 0; i < maxPoolSize; i++) {
+      reusableColorPool.current.push(new Color())
+    }
+  }, [])
+  
+  // プールからVector3を取得
+  const getVector3FromPool = (index: number): Vector3 => {
+    return reusableVector3Pool.current[index % reusableVector3Pool.current.length]
+  }
+  
+  // プールからColorを取得
+  const getColorFromPool = (index: number): Color => {
+    return reusableColorPool.current[index % reusableColorPool.current.length]
+  }
+  
+  const createRandomStreak = (streakIndex: number) => {
     // 球の半径（ワイヤーフレームと同じサイズ）
     const radius = 2
+    
+    // プールからVector3を取得して再利用
+    const poolOffset = streakIndex * 4
+    const startPoint = getVector3FromPool(poolOffset)
+    const endPoint = getVector3FromPool(poolOffset + 1)
+    const controlPoint1 = getVector3FromPool(poolOffset + 2)
+    const controlPoint2 = getVector3FromPool(poolOffset + 3)
     
     // 始点：球面上のランダムな点を生成（球面座標系を使用）
     const phi1 = Math.random() * Math.PI * 2 // 方位角 0-2π
     const theta1 = Math.acos(2 * Math.random() - 1) // 仰角 0-π（均等分布）
-    const startPoint = new Vector3(
+    startPoint.set(
       radius * Math.sin(theta1) * Math.cos(phi1),
       radius * Math.sin(theta1) * Math.sin(phi1),
       radius * Math.cos(theta1)
@@ -37,21 +71,21 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
     // 終点：球面上の別のランダムな点を生成
     const phi2 = Math.random() * Math.PI * 2
     const theta2 = Math.acos(2 * Math.random() - 1)
-    const endPoint = new Vector3(
+    endPoint.set(
       radius * Math.sin(theta2) * Math.cos(phi2),
       radius * Math.sin(theta2) * Math.sin(phi2),
       radius * Math.cos(theta2)
     )
     
     // 制御点1：球の内部のランダムな点（ベジェ曲線の曲がり具合を決定）
-    const controlPoint1 = new Vector3(
+    controlPoint1.set(
       (startPoint.x + endPoint.x) * 0.2 + (Math.random() - 0.5) * 1.0,
       (startPoint.y + endPoint.y) * 0.2 + (Math.random() - 0.5) * 1.0,
       (startPoint.z + endPoint.z) * 0.2 + (Math.random() - 0.5) * 1.0
     )
     
     // 制御点2：球の内部の別のランダムな点
-    const controlPoint2 = new Vector3(
+    controlPoint2.set(
       (startPoint.x + endPoint.x) * 0.8 + (Math.random() - 0.5) * 1.0,
       (startPoint.y + endPoint.y) * 0.8 + (Math.random() - 0.5) * 1.0,
       (startPoint.z + endPoint.z) * 0.8 + (Math.random() - 0.5) * 1.0
@@ -82,8 +116,12 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
     ]
     const randomColor = neonColors[Math.floor(Math.random() * neonColors.length)]
     
+    // プールからColorを取得して再利用
+    const reusableColor = getColorFromPool(streakIndex)
+    reusableColor.set(randomColor)
+    
     const material = new MeshBasicMaterial({
-      color: new Color(randomColor),
+      color: reusableColor,
       transparent: true,
       opacity: 1
     })
@@ -132,10 +170,11 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
   useFrame((_, delta) => {
     time.current += delta
     
-    // 新しい光の筋を生成するタイミング制御
-    // 0.3-1.0秒の間隔でランダムに生成
-    if (time.current - lastStreakTime.current > 0.15 + Math.random() * 0.2) {
-      const newStreak = createRandomStreak()
+    // 新しい光の筋を生成するタイミング制御（頻度を上げる）
+    // 0.2-0.8秒の間隔でランダムに生成
+    if (time.current - lastStreakTime.current > 0.2 + Math.random() * 0.6) {
+      const streakIndex = lightStreaksRef.current.length % maxPoolSize
+      const newStreak = createRandomStreak(streakIndex)
       lightStreaksRef.current.push(newStreak)
       lastStreakTime.current = time.current
     }
