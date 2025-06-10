@@ -218,10 +218,13 @@ export default function LinkSection({ }: LinkSectionProps) {
   const headerStyle: React.CSSProperties = {
     color: '#ffffff',
     fontSize: 'clamp(18px, 4vw, 20px)',
-    fontWeight: 'bold',
+    fontWeight: 500,
     marginBottom: 'clamp(8px, 2vw, 12px)',
     textAlign: 'center',
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: '"Merriweather", serif',
+    fontOpticalSizing: 'auto',
+    fontStyle: 'normal',
+    fontVariationSettings: '"wdth" 100',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
