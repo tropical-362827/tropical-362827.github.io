@@ -61,7 +61,7 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
     const curve = new CubicBezierCurve3(startPoint, controlPoint1, controlPoint2, endPoint)
     
     // チューブジオメトリのパラメータ
-    const segments = 128        // セグメント数（多いほど滑らか、重い）
+    const segments = 64        // セグメント数（多いほど滑らか、重い）
     const tubeRadius = 0.02     // チューブの太さ
     const radialSegments = 8    // チューブの円周方向の分割数
     const tubeGeometry = new TubeGeometry(curve, segments, tubeRadius, radialSegments, false)
@@ -122,7 +122,7 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
     return {
       mesh,
       startTime: time.current,
-      duration: 1.0 + Math.random() * 0.5,  // 1.0-1.5秒の持続時間
+      duration: 1.5 + Math.random() * 0.5,  // 1.0-1.5秒の持続時間
       isActive: true,
       curve,
       segments
@@ -134,7 +134,7 @@ export default function LightStreaks({ sphereRotation }: LightStreaksProps) {
     
     // 新しい光の筋を生成するタイミング制御
     // 0.3-1.0秒の間隔でランダムに生成
-    if (time.current - lastStreakTime.current > 0.05 + Math.random() * 0.2) {
+    if (time.current - lastStreakTime.current > 0.15 + Math.random() * 0.2) {
       const newStreak = createRandomStreak()
       lightStreaksRef.current.push(newStreak)
       lastStreakTime.current = time.current

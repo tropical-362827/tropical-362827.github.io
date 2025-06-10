@@ -12,6 +12,7 @@ function Scene3D() {
   const time = useRef(0)
   const colorTime = useRef(0)
   const bgColorTime = useRef(0)
+  const lastBgHue = useRef(-1)  // 前回の色相をキャッシュ
   
   // 球の回転状態を管理
   const [sphereRotation, setSphereRotation] = useState({ x: 0, y: 0, z: 0 })
@@ -64,8 +65,12 @@ function Scene3D() {
     const backgroundColor = new Color().setHSL(bgHue, 0.8, 0.05)
     scene.background = backgroundColor
     
-    // 背景色をHEX形式でStateに保存
-    setCurrentBgColor(`#${backgroundColor.getHexString()}`)
+    // 背景色をHEX形式でStateに保存（変化があった場合のみ）
+    const hueRounded = Math.round(bgHue * 1000) // 色相を1000分割で丸める
+    if (hueRounded !== lastBgHue.current) {
+      setCurrentBgColor(`#${backgroundColor.getHexString()}`)
+      lastBgHue.current = hueRounded
+    }
   })
   
   return (
