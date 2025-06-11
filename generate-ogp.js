@@ -252,7 +252,7 @@ function generateSvg(commitHash = null) {
         text_content: TEXT_CONFIG.text,
         // コミットハッシュ設定
         commit_x: WIDTH - 220,
-        commit_y: HEIGHT,
+        commit_y: HEIGHT - 5,
         commit_font_family: "'Source Code Pro', monospace",
         commit_font_size: 24,
         commit_color: "#888888",
