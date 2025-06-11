@@ -7,6 +7,7 @@
 const fs = require('fs');
 const { chromium } = require('playwright');
 const { execSync } = require('child_process');
+const seedrandom = require('seedrandom');
 
 // ======== マジックナンバー（調整可能なパラメータ） ========
 
@@ -139,22 +140,24 @@ const SVG_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
 // ======== 星生成関数 ========
 
 /**
- * 指定された設定で星を生成する
+ * 指定された設定で星を生成する（確定的）
  * @param {Object} config 星の設定辞書
+ * @param {function} rng シード固定された乱数生成器
+ * @param {string} configName 設定名（乱数シードの多様性のため）
  * @returns {Array} 星のデータ配列
  */
-function generateStars(config) {
+function generateStars(config, rng, configName) {
     const stars = [];
     for (let i = 0; i < config.count; i++) {
-        // ランダムな位置
-        const x = Math.random() * WIDTH;
-        const y = Math.random() * HEIGHT;
+        // 確定的なランダム位置
+        const x = rng() * WIDTH;
+        const y = rng() * HEIGHT;
         
-        // ランダムなサイズ
-        const radius = Math.random() * (config.size_max - config.size_min) + config.size_min;
+        // 確定的なランダムサイズ
+        const radius = rng() * (config.size_max - config.size_min) + config.size_min;
         
-        // ランダムな透明度
-        const opacity = Math.random() * (config.opacity_max - config.opacity_min) + config.opacity_min;
+        // 確定的なランダム透明度
+        const opacity = rng() * (config.opacity_max - config.opacity_min) + config.opacity_min;
         
         stars.push({
             x: x,
@@ -206,10 +209,21 @@ function escapeHtml(text) {
  * @returns {string} SVGコード
  */
 function generateSvg(commitHash = null) {
-    // 全ての星を生成
+    // コミットハッシュを取得（引数で指定されていない場合）
+    let actualCommitHash = commitHash || getCommitHash();
+    
+    // ハッシュが長い場合は短縮版に切り捨て（7文字）
+    if (actualCommitHash && actualCommitHash.length > 7) {
+        actualCommitHash = actualCommitHash.substring(0, 7);
+    }
+    
+    // コミットハッシュをシードとして乱数生成器を初期化
+    const rng = seedrandom(actualCommitHash);
+    
+    // 全ての星を生成（確定的）
     const allStars = [];
     for (const [configName, config] of Object.entries(STAR_CONFIG)) {
-        const stars = generateStars(config);
+        const stars = generateStars(config, rng, configName);
         allStars.push(...stars);
     }
     
@@ -217,9 +231,6 @@ function generateSvg(commitHash = null) {
     const starsHtml = allStars.map(star => 
         `<circle cx="${star.x.toFixed(1)}" cy="${star.y.toFixed(1)}" r="${star.radius.toFixed(1)}" fill="${star.color}" opacity="${star.opacity.toFixed(2)}" />`
     ).join('\n  ');
-    
-    // コミットハッシュを取得（引数で指定されていない場合）
-    const actualCommitHash = commitHash || getCommitHash();
     
     // テンプレートデータを準備
     const templateData = {
@@ -317,6 +328,12 @@ async function main() {
     // SVGを生成
     const svgContent = generateSvg(commitHash);
     
+    // 実際に使用されたコミットハッシュを取得（短縮版）
+    let actualCommitHash = commitHash || getCommitHash();
+    if (actualCommitHash && actualCommitHash.length > 7) {
+        actualCommitHash = actualCommitHash.substring(0, 7);
+    }
+    
     // SVGファイルに保存
     fs.writeFileSync(OUTPUT_SVG_FILE, svgContent, 'utf8');
     console.log(`SVG画像を生成しました: ${OUTPUT_SVG_FILE}`);
@@ -330,7 +347,7 @@ async function main() {
         console.log(`生成された星の総数: ${totalStars}`);
         console.log(`背景色: ${BACKGROUND_COLOR}`);
         console.log(`画像サイズ: ${WIDTH}x${HEIGHT}px`);
-        console.log(`コミットハッシュ: ${commitHash || getCommitHash()}`);
+        console.log(`コミットハッシュ: ${actualCommitHash}`);
         
         console.log("\n📝 OGP使用について:");
         console.log(`・SVGファイル: ${OUTPUT_SVG_FILE}`);
