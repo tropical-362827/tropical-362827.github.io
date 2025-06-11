@@ -16,7 +16,7 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 // 背景色
-const BACKGROUND_COLOR = "#41102D";
+const BACKGROUND_COLOR = "#04021c"; // 深い紫色
 
 // 星の設定
 const STAR_CONFIG = {
@@ -113,7 +113,7 @@ const SVG_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
   {{stars}}
   
   <!-- テキストの背景 -->
-  <rect width="{{width}}" height="{{text_bg_height}}" y="{{text_bg_y}}" fill="#270A1B" fill-opacity="0.55" />
+  <rect width="{{width}}" height="{{text_bg_height}}" y="{{text_bg_y}}" fill="#000000" fill-opacity="0.70" />
 
   <!-- 中央のテキスト -->
   <text x="{{text_x}}" y="{{text_y}}" 
