@@ -8,6 +8,7 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 const { execSync } = require('child_process');
 const seedrandom = require('seedrandom');
+const { saturation } = require('three/tsl');
 
 // ======== マジックナンバー（調整可能なパラメータ） ========
 
@@ -16,7 +17,7 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 // 背景色
-const BACKGROUND_COLOR = "#04021c"; // 深い紫色
+const BACKGROUND_COLOR = "#000000"; // 黒色
 
 // 星の設定
 const STAR_CONFIG = {
@@ -104,16 +105,24 @@ const SVG_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
     <style>
       @import url('{{font_url}}');
     </style>
+    <!-- ネオンのグロー効果 -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- 背景 -->
-  <rect width="{{width}}" height="{{height}}" fill="{{background_color}}" />
+  <!-- 縦分割の色相帯（24分割） -->
+  {{color_strips}}
   
   <!-- 星フィールド -->
   {{stars}}
   
   <!-- テキストの背景 -->
-  <rect width="{{width}}" height="{{text_bg_height}}" y="{{text_bg_y}}" fill="#000000" fill-opacity="0.70" />
+  <rect width="{{width}}" height="{{text_bg_height}}" y="{{text_bg_y}}" fill="#2a2b2e" opacity="0.8" />
 
   <!-- 中央のテキスト -->
   <text x="{{text_x}}" y="{{text_y}}" 
@@ -232,6 +241,19 @@ function generateSvg(commitHash = null) {
         `<circle cx="${star.x.toFixed(1)}" cy="${star.y.toFixed(1)}" r="${star.radius.toFixed(1)}" fill="${star.color}" opacity="${star.opacity.toFixed(2)}" />`
     ).join('\n  ');
     
+    // 24分割の色相帯を生成
+    const stripCount = 12;
+    const stripWidth = WIDTH / stripCount;
+    const colorStrips = [];
+    
+    for (let i = 0; i < stripCount; i++) {
+        const x = stripWidth * i;
+        const hue = (360 / stripCount) * i; // 15度ずつ
+        colorStrips.push(
+            `<rect x="${x}" y="0" width="${stripWidth}" height="${HEIGHT}" fill="hsl(${hue}, 60%, 20%)" />`
+        );
+    }
+    
     // テンプレートデータを準備
     const templateData = {
         width: WIDTH,
@@ -239,6 +261,9 @@ function generateSvg(commitHash = null) {
         background_color: BACKGROUND_COLOR,
         font_url: escapeHtml(TEXT_CONFIG.google_fonts_url),
         stars: starsHtml,
+        // 24分割の色相帯
+        color_strips: colorStrips.join('\n  '),
+        // テキスト背景設定
         text_bg_height: HEIGHT / 4,
         text_bg_y: HEIGHT - (HEIGHT / 4),
         text_x: TEXT_CONFIG.x,
