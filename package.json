@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "generate-ogp": "node generate-ogp.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
     "@types/react-dom": "^19.1.6",
     "@types/three": "^0.177.0",
     "@vitejs/plugin-react": "^4.5.1",
+    "playwright": "^1.53.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "three": "^0.177.0",
