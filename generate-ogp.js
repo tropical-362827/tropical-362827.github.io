@@ -8,7 +8,6 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 const { execSync } = require('child_process');
 const seedrandom = require('seedrandom');
-const { saturation } = require('three/tsl');
 
 // ======== マジックナンバー（調整可能なパラメータ） ========
 
